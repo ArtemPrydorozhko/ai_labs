@@ -10,7 +10,7 @@ struct State
 {
 	int bucket1;
 	int bucket2;
-	State* parent;
+	State* parent;	//	pointer to previous state. It is needed to build tree of states
 
 	State(int bucket1, int bucket2) {
 		this->bucket1 = bucket1;
@@ -34,7 +34,7 @@ int main()
 		printResult();
 	}
 	else {
-		cout << "n";
+		cout << "Can not find solution";
 	}
     
 }
@@ -49,13 +49,12 @@ bool solve() {
 		State *current = q.front();
 		q.pop();
 
-		// cout << "------" << current.bucket1 << " " << current.bucket2 << "\n";
 		while (true) {
 			State *newState = createState(current->bucket1, current->bucket2);
 			if (newState->bucket1 == -1) {
 				break;
 			}
-		//	cout << newState.bucket1 << " " << newState.bucket2 << '\n';
+
 			newState->parent = current;
 			states.push_back(newState);
 			if (newState->bucket1 == 3 || newState->bucket2 == 3) {
@@ -68,13 +67,14 @@ bool solve() {
 	return false;
 }
 
+// create new state of buckets
 State* createState(int bucket1, int bucket2) {
 	int newbucket1 = 0;
 	int newbucket2 = 0;
 	bool isUnique;
 	State *newState = new State(0, 0);
 
-	if (bucket1 != bucket1Capacity) {
+	if (bucket1 != bucket1Capacity) {	// make first bucket full
 		newbucket1 = bucket1Capacity;
 		newbucket2 = bucket2;
 		isUnique = checkState(newbucket1, newbucket2);
@@ -88,7 +88,7 @@ State* createState(int bucket1, int bucket2) {
 			newbucket2 = 0;
 		}
 	}
-	if (bucket2 != bucket2Capacity) {
+	if (bucket2 != bucket2Capacity) {	// make second bucket full
 		newbucket1 = bucket1;
 		newbucket2 = bucket2Capacity;
 		isUnique = checkState(newbucket1, newbucket2);
@@ -102,7 +102,7 @@ State* createState(int bucket1, int bucket2) {
 			newbucket2 = 0;
 		}
 	}
-	if (bucket1 != bucket1Capacity && bucket2 != 0) {
+	if (bucket1 != bucket1Capacity && bucket2 != 0) {	// pour from second bucket to first
 		int addTobucket1 = bucket1Capacity - bucket1;
 		newbucket1 = bucket1 + (bucket2 <= addTobucket1 ? bucket2 : addTobucket1);
 		newbucket2 = bucket2 <= addTobucket1 ? 0 : bucket2 - addTobucket1;
@@ -117,7 +117,7 @@ State* createState(int bucket1, int bucket2) {
 			newbucket2 = 0;
 		}
 	}
-	if (bucket2 != bucket2Capacity && bucket1 != 0) {
+	if (bucket2 != bucket2Capacity && bucket1 != 0) {	// pour from first bucket to second
 		int addTobucket2 = bucket2Capacity - bucket2;
 		newbucket2 = bucket2 + (bucket1 <= addTobucket2 ? bucket1 : addTobucket2);
 		newbucket1 = bucket1 <= addTobucket2 ? 0 : bucket1 - addTobucket2;
@@ -132,7 +132,7 @@ State* createState(int bucket1, int bucket2) {
 			newbucket2 = 0;
 		}
 	}
-	if (bucket1 != 0) {
+	if (bucket1 != 0) {		// make first bucket empty
 		newbucket1 = 0;
 		newbucket2 = bucket2;
 		isUnique = checkState(newbucket1, newbucket2);
@@ -146,7 +146,7 @@ State* createState(int bucket1, int bucket2) {
 			newbucket2 = 0;
 		}
 	}
-	if (bucket2 != 0) {
+	if (bucket2 != 0) {		// make second bucket empty
 		newbucket1 = bucket1;
 		newbucket2 = 0;
 		isUnique = checkState(newbucket1, newbucket2);
@@ -164,6 +164,7 @@ State* createState(int bucket1, int bucket2) {
 	return new State(-1, -1);
 }
 
+// check if current state of buckets is not copy of existing states
 bool checkState(int bucket1, int bucket2) {
 	bool isUnique = true;
 
