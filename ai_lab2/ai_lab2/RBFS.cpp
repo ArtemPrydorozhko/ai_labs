@@ -32,8 +32,6 @@ void RBFS::solve(Node& start_state_)
 
 int RBFS::rbfs(Node* node, int flimit)
 {
-	if (states.size() % 1000 == 0)
-		cout << states.size() << endl;
 	if (check_goal(node))
 	{
 		print_solution(node);
