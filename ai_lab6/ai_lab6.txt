@@ -1,0 +1,99 @@
+; 1 - стул 2 - стол 3 - шкаф 4 - кресло
+;([2,1,3,1,0,4], [2,1,4,1,0,3])
+(defglobal
+	?*algo* = dfs
+	?*start* = "214103"
+	?*finish* = "213104"
+	?*states* = (create$ ?*start*))
+
+(deffunction swap-elements (?state ?first ?second)
+	(str-cat (sub-string 1 (- ?first 1) ?state)
+			 (sub-string ?second ?second ?state)
+			 (sub-string (+ ?first 1) (- ?second 1) ?state)
+			 (sub-string ?first ?first ?state)
+			 (sub-string (+ ?second 1) (str-length ?state)  ?state)))
+
+(deffunction move-left (?state ?zero-index)
+	(if (> (mod (- ?zero-index 1) 3) 0)
+		then 
+		(swap-elements ?state (- ?zero-index 1) ?zero-index)
+		else
+		""
+		))
+		
+(deffunction move-right (?state ?zero-index)
+	(if (< (mod (- ?zero-index 1) 3) 2)
+		then 
+		(swap-elements ?state ?zero-index (+ ?zero-index 1))
+		else
+		""
+		))
+		
+(deffunction move-top (?state ?zero-index)
+	(if (> (- ?zero-index 1) 2)
+		then 
+		(swap-elements ?state (- ?zero-index 3) ?zero-index)
+		else
+		""
+		))
+		
+(deffunction move-down (?state ?zero-index)
+	(if (< (- ?zero-index 1) 3)
+		then 
+		(swap-elements ?state ?zero-index (+ ?zero-index 3))
+		else
+		""
+		))
+		
+(deffunction expand-state (?state)
+	(bind ?zero-index (str-index "0" ?state))
+	(bind ?move-left (move-left ?state ?zero-index))
+	(bind ?move-right (move-right ?state ?zero-index))
+	(bind ?move-top (move-top ?state ?zero-index))
+	(bind ?move-down (move-down ?state ?zero-index))
+	(bind ?children (create$))
+	(if (and (neq ?move-left "") (not (member$ ?move-left ?*states*)))
+		then
+		(bind ?children (create$ ?children ?move-left)))
+	(if (and (neq ?move-right "") (not (member$ ?move-right ?*states*)))
+		then
+		(bind ?children (create$ ?children ?move-right)))
+	(if (and (neq ?move-top "") (not (member$ ?move-top ?*states*)))
+		then
+		(bind ?children (create$ ?children ?move-top)))
+	(if (and (neq ?move-down "") (not (member$ ?move-down ?*states*)))
+		then
+		(bind ?children (create$ ?children ?move-down)))
+	(return ?children))
+
+(deffunction bfs (?queue)
+	(bind ?current-state (nth$ 1 ?queue))
+	(bind ?queue (delete$ ?queue 1 1))
+	(if (eq ?current-state ?*finish*)
+		then
+		(printout t ?current-state crlf)
+		else
+		(bind ?children (expand-state ?current-state))
+		(bind ?*states* (create$ ?*states* ?children))
+		(bind ?queue (create$ ?queue ?children))
+		(bfs ?queue)))
+	
+(deffunction dfs (?current-state ?path)
+	(if (eq ?current-state ?*finish*)
+		then
+		(printout t ?current-state crlf)
+		(printout t ?path crlf)
+		else
+		(bind ?children (expand-state ?current-state))
+		(loop-for-count (?i (length$ ?children))
+			(bind ?*states* (create$ ?*states* ?children))
+			(dfs (nth$ ?i ?children) (create$ ?path ?current-state)))))
+
+(if (eq ?*algo* bfs)
+	then
+	(bfs (create$ ?*start*))
+	else
+	(dfs ?*start* ""))
+
+(exit)
+; empty line at the end
